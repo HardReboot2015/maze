@@ -9,8 +9,8 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # Визначення ігрової карти та характеристик
 MapCell = namedtuple('MapCell', ['type', 'color'])
-MapCellType = Enum('MapCellType', 'EMPTY WALL FIRE START FINISH KEY HEART UNPASSABLE')
-MapCellColor = Enum('MapCellColor', 'ORANGE WHITE NONE')
+MapCellType = Enum('MapCellType', 'EMPTY WALL FIRE START FINISH KEY HEART')
+MapCellColor = Enum('MapCellColor', 'ORANGE WHITE')
 WallMapCell = MapCell(MapCellType.WALL, MapCellColor.WHITE)
 EmptyMapCell = MapCell(MapCellType.EMPTY, MapCellColor.WHITE)
 class Hero:
@@ -56,10 +56,9 @@ class Hero:
             self.health = 5
             self.ignore_previous_position = True
         elif cell.color == MapCellColor.ORANGE:
- #           logging.info(f'{self.name} підібрав ключ.')
- #           self.has_key = True
+
             self.ignore_previous_position = True
- #           game_map[self.x][self.y] = MapCell(MapCellType.EMPTY)
+
         elif cell.type == MapCellType.FINISH:
             if self.has_key:
                 logging.info(f'{self.name} переміг!')
@@ -86,10 +85,10 @@ class Hero:
 
 
 
-#  n  n  n  w  h  e  e  f  (   ) (   ) (   ) (   ) (0,4) (0,5) (0,6) (0,7)
-#  n  w  k  w  w  e  w  n  (   ) (   ) (1,2) (   ) (   ) (1,5) (   ) (   )
-#  w  e  e  e  w  e  h  w  (   ) (2,1) (2,2) (2,3) (   ) (2,5) (2,6) (   )
-#  s  e  w  e  e  e  w  n  (3,0) (3,1) (   ) (3,3) (3,4) (3,5) (   ) (   )
+#   (   ) (   ) (   ) (   ) (0,4) (0,5) (0,6) (0,7)
+#   (   ) (   ) (1,2) (   ) (   ) (1,5) (   ) (   )
+#   (   ) (2,1) (2,2) (2,3) (   ) (2,5) (2,6) (   )
+#   (3,0) (3,1) (   ) (3,3) (3,4) (3,5) (   ) (   )
 def create_game_map():
     game_map = [
         [WallMapCell, WallMapCell, WallMapCell, WallMapCell, MapCell(MapCellType.HEART, MapCellColor.ORANGE), EmptyMapCell, EmptyMapCell, MapCell(MapCellType.FINISH, MapCellColor.WHITE)],
