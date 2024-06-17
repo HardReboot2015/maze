@@ -163,9 +163,9 @@ def game():
             raise FileNotFoundError
     except (FileNotFoundError, json.JSONDecodeError):
         while True:
-            inp_heroes = (input('Введіть кількість героїв: '))
-            if inp_heroes.isdigit():
-                num_heroes = int(inp_heroes)
+            num_heroes = (input('Введіть кількість героїв: '))
+            if num_heroes.isdigit():
+                num_heroes = int(num_heroes)
                 break
         heroes = [Hero(input(f'Введіть ім\'я героя {i + 1}: '), 3, 0) for i in range(num_heroes)]
         game_map = create_game_map()
