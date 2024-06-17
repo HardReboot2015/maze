@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from collections import namedtuple
 from enum import Enum
+import os.path
 
 # Налаштування логування
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -119,28 +120,36 @@ def clear_fire_cells(game_map):
         game_map[i][j] = MapCell(MapCellType.EMPTY, MapCellColor.WHITE)
     return
 
-def save_game(heroes, game_map, filename="savegame.json"):
-    state = {
-        'heroes': [{'name': hero.name, 'health': hero.health, 'actions': hero.actions, 'x': hero.x, 'y': hero.y, 'heals_left': hero.heals_left, 'has_key': hero.has_key, 'previous_position': hero.previous_position} for hero in heroes],
-        'game_map': [[cell.type.name for cell in row] for row in game_map]
-    }
-    with open(filename, 'w') as f:
-        json.dump(state, f)
-    logging.info('Гру збережено.')
 
 def load_game(filename="savegame.json"):
     with open(filename, 'r') as f:
         state = json.load(f)
+
     heroes = [Hero(h['name'], h['x'], h['y']) for h in state['heroes']]
-    for hero, h in zip(heroes, state['heroes']):
-        hero.health = h['health']
-        hero.actions = h['actions']
-        hero.heals_left = h['heals_left']
-        hero.has_key = h['has_key']
-        hero.previous_position = tuple(h['previous_position']) if h['previous_position'] else None
-    game_map = [[MapCell(MapCellType[cell]) for cell in row] for row in state['game_map']]
+
+    game_map = []
+    for row in state['game_map']:
+        map_row = []
+        for cell_data in row:
+            cell_type = MapCellType[cell_data['type']]
+            cell_color = MapCellColor[cell_data['color']]
+            cell = MapCell(cell_type, cell_color)
+            map_row.append(cell)
+        game_map.append(map_row)
+
     return heroes, game_map
 
+
+def save_game(heroes, game_map, filename="savegame.json"):
+    state = {
+        'heroes': [{'name': hero.name, 'x': hero.x, 'y': hero.y} for hero in heroes],
+        'game_map': [[{'type': cell.type.name,
+                       'color': cell.color.name} for cell in row] for row in game_map]
+    }
+    with open(filename, 'w') as f:
+        json.dump(state, f)
+
+    logging.info('Гру збережено.')
 def game():
 
     # Перевірка наявності збереженої гри
@@ -149,7 +158,8 @@ def game():
             pass
         load_existing = input('Є збережена гра. Завантажити її? (так/ні): ').strip().lower()
         if load_existing == 'так':
-            heroes, game_map = load_game()
+            if os.path.isfile('savegame.json'):
+                heroes, game_map = load_game()
         else:
             raise FileNotFoundError
     except (FileNotFoundError, json.JSONDecodeError):
