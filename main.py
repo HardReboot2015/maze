@@ -65,7 +65,6 @@ class Hero:
 
         elif cell.type == MapCellType.FINISH:
             if self.has_key:
-                logging.info(f'{self.name} переміг!')
                 return True
             else:
                 logging.info(f'{self.name} загинув від Голема.')
@@ -173,9 +172,7 @@ def game():
             if hero.health <= 0:
                 logging.info(f'{hero.name} загинув.')
                 if hero.has_key == True:
-                    print("you.re here")
                     color = game_map[hero.x][hero.y].color
-
                     game_map[hero.x][hero.y] = MapCell(MapCellType.KEY, color)
                     logging.info(f'ключ на клітині {hero.x, hero.y}')
                 heroes.remove(hero)
