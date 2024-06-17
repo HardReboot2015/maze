@@ -39,9 +39,12 @@ class Hero:
         if (new_x, new_y) == self.previous_position and not self.ignore_previous_position:
             logging.info(f'{self.name} злякався і втік.')
             self.health = 0
+            if self.has_key:
+                game_map[self.x][self.y].type = MapCellType.KEY
             return False
         self.ignore_previous_position = False
-        self.previous_position = (self.x, self.y)
+        if not self.ignore_previous_position:
+            self.previous_position = (self.x, self.y)
         self.x = new_x
         self.y = new_y
         return self.resolve_cell(game_map)
@@ -139,6 +142,7 @@ def load_game(filename="savegame.json"):
     return heroes, game_map
 
 def game():
+
     # Перевірка наявності збереженої гри
     try:
         with open('savegame.json', 'r') as f:
@@ -152,16 +156,26 @@ def game():
         num_heroes = int(input('Введіть кількість героїв: '))
         heroes = [Hero(input(f'Введіть ім\'я героя {i + 1}: '), 3, 0) for i in range(num_heroes)]
         game_map = create_game_map()
-
+    available_movement = ['вгору', 'вниз', 'вліво', 'вправо', 'лікуватися', 'вдарити мечем', 'підібрати ключ']
     while True:
         fire_cells = add_fire_cells(game_map)
         for hero in heroes[:]:
             if hero.health <= 0:
                 logging.info(f'{hero.name} загинув.')
+                if hero.has_key == True:
+                    print("you.re here")
+                    color = game_map[hero.x][hero.y].color
+
+                    game_map[hero.x][hero.y] = MapCell(MapCellType.KEY, color)
+                    logging.info(f'ключ на клітині {hero.x, hero.y}')
                 heroes.remove(hero)
                 continue
+            while True:
+                action = input(f'{hero.name}, ваш хід (вгору, вниз, вліво, вправо, лікуватися, вдарити мечем, підібрати ключ): ').strip().lower()
+                if action in available_movement:
+                    break
+                logging.info('Невідома дія, спробуйте знову.')
 
-            action = input(f'{hero.name}, ваш хід (вгору, вниз, вліво, вправо, лікуватися, вдарити мечем, підібрати ключ, вихід): ').strip().lower()
             if action == 'вгору':
                 if not hero.move(-1, 0, game_map):
                     continue
@@ -188,19 +202,13 @@ def game():
                 else:
                     logging.info(f'На цій клітині немає ключа.')
                 continue
-            else:
-                logging.info('Невідома дія, спробуйте знову.')
-                continue
+
 
             if hero.resolve_cell(game_map):
                 logging.info(f'Гра закінчена, {hero.name} переміг!')
                 return
 
-            if hero.health <= 0:
-                logging.info(f'{hero.name} загинув.')
-                if hero.has_key:
-                    game_map[hero.x][hero.y].type = MapCellType.KEY
-                heroes.remove(hero)
+
         if not heroes:
             logging.info('Всі герої загинули. Гра закінчена.')
             break
